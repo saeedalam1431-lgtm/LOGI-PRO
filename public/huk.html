@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccountPro | New Export Entry</title>
+        <script src="security.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            background-color: #f8fafc; 
+            font-family: 'Inter', sans-serif; 
+            -webkit-user-select: none; 
+            user-select: none; 
+        }
+        .input-style { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; transition: 0.3s; background: #fff; font-size: 14px; }
+        .input-style:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1); }
+        .input-style:required { border-left: 4px solid #cbd5e1; }
+        .input-style:required:invalid { border-left-color: #dc2626; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        .section-label { color: #dc2626; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+        input { user-select: text !important; }
+    </style>
+</head>
+<body oncontextmenu="return false;"> 
+
+
+    <div class="max-w-7xl mx-auto p-4 md:p-10">
+        <header class="flex flex-col md:flex-row md:items-center justify-between bg-white p-8 rounded-3xl card-shadow mb-8 border border-white">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight italic">LOGI<span class="text-red-600">PRO</span></h1>
+                <p id="headerDesc" class="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">Clearing & Forwarding_Export_Report_</p>
+            </div>
+            <a href="eporthistory.html" class="bg-slate-900 text-white font-bold px-6 py-4 rounded-2xl hover:bg-red-600 transition shadow-lg mt-4 md:mt-0 inline-block text-center">
+                <i class="fas fa-list-ul mr-2"></i> OPEN LEDGER
+            </a>
+        </header>
+
+        <div class="bg-white p-8 md:p-12 rounded-3xl card-shadow max-w-5xl mx-auto border border-white">
+            <form id="mainForm" class="space-y-10">
+                
+                <div>
+                    <h3 class="section-label"><i class="fas fa-file-invoice"></i> Consignee & GD Info</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Party Name (Exporter) <span class="text-red-500">*</span></label>
+                            <input type="text" id="partyName" list="partyList" required maxlength="22" class="input-style" placeholder="Max 22 chars...">
+                            <datalist id="partyList"></datalist>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">GD Number <span class="text-red-500">*</span></label>
+                            <input type="text" id="gdNum" required class="input-style" placeholder="EX-KAPE-...">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="section-label"><i class="fas fa-ship"></i> Logistics & Shipment</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Container No.</label>
+                            <input type="text" id="contNum" list="contList" class="input-style" placeholder="MSKU-...">
+                            <datalist id="contList"></datalist>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Shipping Line <span class="text-red-500">*</span></label>
+                            <input type="text" id="shipLine" list="lineList" required class="input-style" placeholder="Line name...">
+                            <datalist id="lineList"></datalist>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">B/L or CRO No. <span class="text-red-500">*</span></label>
+                            <input type="text" id="blNum" list="blList" required class="input-style" placeholder="BL-...">
+                            <datalist id="blList"></datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100">
+                    <h3 class="section-label"><i class="fas fa-money-bill-wave"></i> Accounts & Billing</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Total Bill</label>
+                            <input type="number" id="bill" required class="input-style font-bold text-slate-700" value="0" step="any">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-green-600 uppercase mb-2 block">Paid by Party</label>
+                            <input type="number" id="paid" required class="input-style font-bold text-green-600" value="0" step="any">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-red-600 uppercase mb-2 block">Balance Due</label>
+                            <div id="liveBalance" class="p-3 bg-white border border-slate-200 text-red-600 font-black rounded-lg text-center shadow-sm h-[46px] flex items-center justify-center">0</div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Bank / Payment Via</label>
+                            <input type="text" id="payMethod" list="bankList" class="input-style font-bold" placeholder="Select or Type Bank...">
+                            <datalist id="bankList">
+                                <option value="Cash">
+                                <option value="HBL">
+                                <option value="Meezan Bank">
+                                <option value="Faysal Bank">
+                                <option value="MCB">
+                                <option value="UBL">
+                                <option value="Bank Alfalah">
+                                <option value="Allied Bank">
+                                <option value="Standard Chartered">
+                                <option value="Payment Pending">
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl hover:bg-red-600 transition shadow-xl uppercase tracking-widest text-lg">
+                    Confirm & Save
+                </button>
+            </form>
+        </div>
+    </div>
+    
+<script src="api.js"></script> 
+<script>
+    const bIn = document.getElementById('bill');
+    const pIn = document.getElementById('paid');
+    const lb = document.getElementById('liveBalance');
+    const partyInput = document.getElementById('partyName');
+
+    // --- 1. SMART AUTO-FILL (Stable Name Logic) ---
+    function syncPartyContext() {
+        const currentParty = localStorage.getItem('current_party_name');
+        if (currentParty && partyInput) {
+            partyInput.value = currentParty.toUpperCase();
+            // Isko readonly kiya taake data stable rahe aur mismatch na ho
+            partyInput.readOnly = true; 
+            partyInput.style.backgroundColor = "#f8fafc"; // Light grey color for locked feel
+            partyInput.style.color = "#1e293b";
+            partyInput.style.fontWeight = "800";
+        }
+    }
+
+    // Page load hote hi context check karein
+    window.addEventListener('DOMContentLoaded', syncPartyContext);
+
+    // --- 2. LIVE BALANCE CALCULATION ---
+    const updateBalance = () => {
+        const billValue = parseFloat(bIn.value) || 0;
+        const paidValue = parseFloat(pIn.value) || 0;
+        const balance = billValue - paidValue;
+        lb.innerText = balance.toLocaleString();
+        
+        if(balance <= 0) { 
+            lb.classList.replace('text-red-600', 'text-green-600'); 
+        } else { 
+            lb.classList.replace('text-green-600', 'text-red-600'); 
+        }
+    };
+
+    bIn.addEventListener('input', updateBalance);
+    pIn.addEventListener('input', updateBalance);
+
+    // --- 3. SMART SUGGESTIONS (For other fields) ---
+    function setupSmartSuggestions(inputId, listId, dataKey) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+        if(!input || !list) return;
+
+        input.addEventListener('input', () => {
+            const query = input.value.toUpperCase().trim();
+            let records = JSON.parse(localStorage.getItem('export_suggestions')) || [];
+            const uniqueValues = [...new Set(records.map(r => r[dataKey]))].filter(v => v);
+            
+            list.innerHTML = "";
+            if(query.length > 0) {
+                const filtered = uniqueValues.filter(v => v.toUpperCase().startsWith(query));
+                filtered.forEach(val => {
+                    const option = document.createElement('option');
+                    option.value = val;
+                    list.appendChild(option);
+                });
+            }
+        });
+    }
+
+    // Party suggestions ki zaroorat nahi kyunki name ab auto-sync hai
+    setupSmartSuggestions('shipLine', 'lineList', 'shipping_line');
+    setupSmartSuggestions('blNum', 'blList', 'bl_number');
+
+    // --- 4. MAIN SAVE LOGIC ---
+    document.getElementById('mainForm').onsubmit = async (e) => {
+        e.preventDefault();
+
+        const party = partyInput.value.trim();
+        const gd = document.getElementById('gdNum').value.trim();
+        const billAmt = parseFloat(bIn.value) || 0;
+        const paidAmt = parseFloat(pIn.value) || 0;
+
+        if(!party || !gd || billAmt === 0) {
+            alert("Sain! Party Name, GD Number aur Bill lazmi bharen.");
+            return;
+        }
+
+        const entryData = {
+            date: new Date().toISOString().split('T')[0],
+            party: party.toUpperCase(),
+            gd_number: gd.toUpperCase(),
+            container_number: (document.getElementById('contNum').value || "").toUpperCase().trim(),
+            shipping_line: (document.getElementById('shipLine').value || "").toUpperCase().trim(),
+            bl_number: (document.getElementById('blNum').value || "").toUpperCase().trim(),
+            total_bill: billAmt,
+            paid: paidAmt,
+            method: document.getElementById('payMethod').value,
+            payable: billAmt - paidAmt
+        };
+
+        try {
+            // Cloud Database API call
+            const result = await Database.save('api/export/add', entryData);
+            
+            if(result.success) {
+                // Update local suggestions for future fast typing
+                let records = JSON.parse(localStorage.getItem('export_suggestions')) || [];
+                records.push({ 
+                    party: entryData.party, 
+                    shipping_line: entryData.shipping_line, 
+                    bl_number: entryData.bl_number 
+                });
+                localStorage.setItem('export_suggestions', JSON.stringify(records.slice(-100)));
+
+                alert("LogiPro: Export Job Saved Successfully!");
+                window.location.href = 'eporthistory.html'; 
+            }
+        } catch (error) {
+            console.error("Save Error:", error);
+            alert("Error: " + error.message + "\n\nTip: CMD/Terminal check karein ke backend server on hai.");
+        }
+    };
+
+    // Right-click and DevTools protection
+    document.onkeydown = (e) => {
+        if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 85 || e.keyCode === 73)) return false;
+    };
+</script></body>
+</html>

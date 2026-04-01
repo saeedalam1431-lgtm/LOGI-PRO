@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiPro | GD System Setup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #050810;
+            --panel: #0f172a;
+            --neon-red: #ff0000;
+            --neon-gold: #fbbf24;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+        }
+
+        .setup-box {
+            background-color: var(--panel);
+            width: 100%; max-width: 400px;
+            padding: 40px; border-radius: 20px;
+            border: 1px solid var(--neon-red);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.2);
+            position: relative;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-red);
+            font-size: 1.5rem; margin-bottom: 35px;
+            text-transform: uppercase; text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .input-group { margin-bottom: 25px; }
+
+        .input-group label {
+            display: block; font-size: 0.7rem;
+            color: #94a3b8; font-weight: 700;
+            margin-bottom: 8px; text-transform: uppercase;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%; padding: 14px;
+            background-color: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 8px; color: white;
+            font-size: 1rem; box-sizing: border-box;
+            outline: none; transition: 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .btn-generate {
+            width: 100%; padding: 16px;
+            background-color: var(--neon-gold);
+            color: black; border: none;
+            border-radius: 8px; font-weight: 800;
+            text-transform: uppercase; cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: 0.2s;
+        }
+
+        .btn-generate:hover {
+            transform: scale(1.02);
+            background-color: #f59e0b;
+        }
+
+        .btn-cancel {
+            display: block; text-align: center;
+            width: 100%; margin-top: 20px;
+            color: #64748b; text-decoration: none;
+            font-size: 0.75rem; font-weight: 700;
+            background: none; border: none; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="setup-box">
+    <h2>Setup New GD System</h2>
+    
+    <div class="input-group">
+        <label>PARTY NAME (CONSIGNEE/SHIPPER) *</label>
+        <input type="text" id="partyName" placeholder="e.g. LUCKY CEMENT LTD" autocomplete="off">
+    </div>
+
+    <div class="input-group">
+        <label>SELECT GD CATEGORY *</label>
+        <select id="sysCategory">
+            <option value="IMPORT">IMPORT GD MANAGEMENT</option>
+            <option value="EXPORT">EXPORT GD MANAGEMENT</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>OTHER DETAILS (B/L, CONT, OR NOTES)</label>
+        <input type="text" id="otherDetails" placeholder="e.g. NTN: 12345-6 or Terminal Info">
+    </div>
+
+    <button onclick="createGDSystem()" class="btn-generate">GENERATE SYSTEM</button>
+    <button onclick="window.location.href='index.html'" class="btn-cancel">CANCEL SESSION</button>
+</div>
+
+<script>
+    function createGDSystem() {
+        const partyInput = document.getElementById('partyName').value.trim();
+        const category = document.getElementById('sysCategory').value;
+        const details = document.getElementById('otherDetails').value.trim();
+
+        if (!partyInput) {
+            alert("ALERT: Party Name is required for GD Filing!");
+            return;
+        }
+
+        const partyName = partyInput.toUpperCase();
+        
+        // --- LOGIC FOR REDIRECTION AND STORAGE ---
+        const gdSystem = {
+            id: 'GD-' + Date.now(),
+            company: details || "GD FILING SERVICE", 
+            name: partyName,                           
+            opening: 0,                               
+            category: category + " GD",              
+            isGD: true,
+            timestamp: new Date().toLocaleString()
+        };
+
+        try {
+            // 1. Common Dashboard Storage
+            let allLedgers = JSON.parse(localStorage.getItem('my_local_ledgers')) || [];
+            allLedgers.push(gdSystem);
+            localStorage.setItem('my_local_ledgers', JSON.stringify(allLedgers));
+
+            // 2. Setting Current Active Party
+            localStorage.setItem('current_party_name', partyName);
+
+            const safePartyName = encodeURIComponent(partyName);
+            
+            // 3. Routing Logic based on Category
+            if (category === "IMPORT") {
+                // Agar Import hai to Import wale database aur page pe bhejo
+                window.location.href = `importdataentry.html?party=${safePartyName}`;
+            } else if (category === "EXPORT") {
+                // Agar Export hai to Export wale database aur page pe bhejo
+                window.location.href = `huk.html?party=${safePartyName}`;
+            }
+
+        } catch (e) {
+            console.error("Storage Error:", e);
+            alert("Error: System generate nahi ho saka.");
+        }
+    }
+</script>
+
+</body>
+</html>

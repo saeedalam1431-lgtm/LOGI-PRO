@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiPro | Import Account Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        body { 
+            background: url('imgback/logo.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Inter', sans-serif; 
+            -webkit-user-select: none; 
+            user-select: none; 
+            overflow-x: hidden; 
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(240, 244, 248, 0.85); 
+            z-index: -1;
+        }
+
+        .table-container { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            border: 1px solid #cbd5e1; 
+            width: 100%; 
+            overflow: hidden; 
+        }
+
+        .logi-header { background: #a93434; } 
+        .compact-td { padding: 8px 12px !important; }
+        .overflow-x-auto::-webkit-scrollbar { height: 5px; }
+        .overflow-x-auto::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        #editModal { background: rgba(30, 58, 138, 0.4); backdrop-filter: blur(6px); }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="w-full max-w-[99%] mx-auto p-2 md:p-4">
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4 p-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-100">
+                    <i class="fas fa-ship fa-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-baseline gap-3">
+                        <h1 class="text-5xl font-black italic tracking-tighter leading-none">LOGI<span class="text-red-500">PRO</span></h1>
+                        <h2 id="topPartyName" class="text-2xl font-black text-slate-800 uppercase italic border-l-2 border-slate-300 pl-3 leading-none md:block"></h2>
+                    </div>
+                    <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest mt-1">Import G D Account Management</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
+                    <a href="index.html" class="bg-black text-white font-bold px-4 py-2 rounded-lg hover:bg-slate-800 transition-all flex items-center gap-2 text-[10px] uppercase shadow-md border border-white/10">
+                        <i class="fas fa-th-large text-blue-400"></i> Dashboard
+                    </a>
+
+                    <button onclick="downloadSecurePDF()" class="bg-black text-white font-bold px-4 py-2 rounded-lg hover:bg-slate-800 transition-all flex items-center gap-2 text-[10px] uppercase shadow-md border border-white/10">
+                        <i class="fas fa-file-pdf text-red-500"></i> Generate PDF
+                    </button>
+                    <a href="#" onclick="goToEntry()" class="bg-blue-600 text-white font-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-all shadow-lg text-[10px] italic">+ NEW ENTRY</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="relative mb-4 w-full max-w-sm">
+            <span class="absolute inset-y-0 left-3 flex items-center text-slate-400"><i class="fas fa-search text-[10px]"></i></span>
+            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search data..." class="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 text-xs font-semibold shadow-sm">
+        </div>
+
+        <div class="table-container">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1000px]" id="ledgerTable">
+                    <thead>
+                        <tr class="logi-header text-white uppercase text-[9px] tracking-wider font-bold">
+                            <th class="compact-td">Date</th>
+                            <th class="compact-td">Importer Name</th>
+                            <th class="compact-td">ID / Index</th>
+                            <th class="compact-td">Cargo Details</th>
+                            <th class="compact-td">Total Bill</th>
+                            <th class="compact-td">Paid</th>
+                            <th class="compact-td">Mode</th> 
+                            <th class="compact-td">Payable</th>
+                            <th class="compact-td text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="text-slate-600 text-[12px] font-semibold"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border-t-8 border-blue-600">
+            <div class="bg-slate-900 p-4 text-white flex justify-between items-center">
+                <h3 class="font-black italic text-md uppercase">Edit Import Record</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+            </div>
+            <form id="editForm" class="p-6 grid grid-cols-2 gap-3">
+                <input type="hidden" id="editIndex">
+                <div class="col-span-2">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase">Importer Name</label>
+                    <input type="text" id="editParty" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none uppercase">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase">ID Number</label>
+                    <input type="text" id="editGd" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none uppercase">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase">Date</label>
+                    <input type="date" id="editDate" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase">BL Number</label>
+                    <input type="text" id="editBl" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none uppercase">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-slate-400 uppercase">Shipping</label>
+                    <input type="text" id="editLine" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none uppercase">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase">Container</label>
+                    <input type="text" id="editCont" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none uppercase">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-blue-600 uppercase">Total Bill</label>
+                    <input type="number" id="editBill" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-emerald-600 uppercase">Paid Amount</label>
+                    <input type="number" id="editPaid" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-xs font-bold outline-none">
+                </div>
+                <div class="col-span-2 mt-4 flex gap-2">
+                    <button type="button" onclick="saveEdit()" class="flex-1 bg-blue-600 text-white font-black py-2 rounded-lg text-xs italic uppercase">Update</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-lg text-xs uppercase">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+<script src="api.js"></script>
+<script>
+    // --- LOGIPRO DYNAMIC CONFIG ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentParty = urlParams.get('party') || "GENERAL";
+
+    if(document.getElementById('topPartyName')) {
+        document.getElementById('topPartyName').innerText = currentParty.toUpperCase();
+    }
+
+    function goToEntry() {
+        window.location.href = `importcard.html?party=${encodeURIComponent(currentParty)}`;
+    }
+
+    // --- CLOUD DATA LOGIC ---
+    let filteredRecords = []; 
+
+    async function syncData() {
+        try {
+            // NAYA URL: api/import/all
+            const response = await fetch('http://localhost:3000/api/import/all');
+            const allRecords = await response.json();
+            
+            filteredRecords = allRecords.filter(r => 
+                r.party && r.party.toUpperCase() === currentParty.toUpperCase()
+            );
+            render(); 
+            if(typeof updateStats === 'function') updateStats(); 
+        } catch (error) {
+            console.error("Cloud Error:", error);
+        }
+    }
+
+    window.onload = syncData;
+
+    function render() {
+        const tbody = document.getElementById('tableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = filteredRecords.slice().reverse().map((r) => {
+            const billVal = parseFloat(r.total_bill || r.bill || 0);
+            const paidVal = parseFloat(r.paid || 0);
+            const balance = billVal - paidVal;
+            const receivedColor = paidVal < billVal ? "text-red-500" : "text-emerald-400";
+            const displayDate = r.date ? new Date(r.date).toLocaleDateString('en-GB') : '-';
+
+            return `
+            <tr class="border-b border-slate-800 hover:bg-blue-50/10 transition-all">
+                <td class="compact-td text-[10px] text-slate-400 font-bold">${displayDate}</td>
+                <td class="compact-td font-bold text-slate-300 uppercase text-[11px]">${r.party || 'N/A'}</td>
+                <td class="compact-td font-bold text-blue-400 text-[11px]">${r.gd_number || r.gd || 'N/A'}</td>
+                <td class="compact-td text-[9px] leading-tight">
+                    <span class="text-blue-500 font-black block italic">BL: ${r.bl_number || r.bl || '-'}</span>
+                    <div class="bg-slate-800 text-white px-1.5 py-0.5 rounded inline-block font-bold uppercase my-0.5">
+                       CONT: ${r.container_number || r.container || '-'}
+                    </div>
+                    <span class="text-slate-400 block italic">SHIP: ${r.shipping_line || r.line || '-'}</span>
+                </td>
+                <td class="compact-td font-bold text-slate-300">${billVal.toLocaleString()}</td>
+                <td class="compact-td font-bold ${receivedColor}">${paidVal.toLocaleString()}</td>
+                <td class="compact-td font-bold text-blue-300 text-[10px]">${r.method || '-'}</td>
+                <td class="compact-td font-bold text-red-500">${balance.toLocaleString()}</td>
+                <td class="compact-td text-center">
+                    <div class="flex items-center justify-center gap-1">
+                        <button onclick="openModal('${r.id}')" class="text-slate-300 hover:text-blue-500 p-1.5">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteRow('${r.id}')" class="text-slate-300 hover:text-red-500 p-1.5">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // --- MODAL FUNCTIONS ---
+    function openModal(id) {
+        const record = filteredRecords.find(r => r.id == id);
+        if(!record) return;
+
+        document.getElementById('editIndex').value = record.id;
+        document.getElementById('editParty').value = record.party || "";
+        document.getElementById('editGd').value = record.gd_number || record.gd || "";
+        document.getElementById('editDate').value = record.date ? record.date.split('T')[0] : "";
+        document.getElementById('editBl').value = record.bl_number || record.bl || "";
+        document.getElementById('editLine').value = record.shipping_line || record.line || "";
+        document.getElementById('editCont').value = record.container_number || record.container || "";
+        document.getElementById('editBill').value = record.total_bill || record.bill || 0;
+        document.getElementById('editPaid').value = record.paid || 0;
+
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
+
+    async function saveEdit() {
+        const id = document.getElementById('editIndex').value;
+        
+        const updatedData = {
+            party: document.getElementById('editParty').value,
+            date: document.getElementById('editDate').value,
+            gd_number: document.getElementById('editGd').value,
+            bl_number: document.getElementById('editBl').value,
+            shipping_line: document.getElementById('editLine').value,
+            container_number: document.getElementById('editCont').value,
+            total_bill: parseFloat(document.getElementById('editBill').value),
+            paid: parseFloat(document.getElementById('editPaid').value)
+        };
+
+        try {
+            // NAYA URL: api/import/update
+            const response = await fetch(`http://localhost:3000/api/import/update/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedData)
+            });
+            
+            const result = await response.json();
+            if(result.success) {
+                alert("LogiPro: Record Updated Successfully!");
+                closeModal();
+                syncData(); 
+            } else {
+                alert("Error updating record: " + result.error);
+            }
+        } catch (error) {
+            console.error("Update Error:", error);
+            alert("Server connection failed!");
+        }
+    }
+
+    async function deleteRow(id) {
+        if (confirm("Kya aap waqai ye record mitaana chahte hain?")) {
+            try {
+                // NAYA URL: api/import/delete
+                const response = await fetch(`http://localhost:3000/api/import/delete/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if(result.success) {
+                    syncData();
+                }
+            } catch (error) {
+                console.error("Delete Error:", error);
+            }
+        }
+    }
+
+    function searchTable() {
+        const input = document.getElementById("searchInput").value.toUpperCase();
+        const rows = document.getElementById("tableBody").getElementsByTagName("tr");
+        for (let i = 0; i < rows.length; i++) {
+            rows[i].style.display = rows[i].innerText.toUpperCase().includes(input) ? "" : "none";
+        }
+    }
+</script>
+</body>
+</html>

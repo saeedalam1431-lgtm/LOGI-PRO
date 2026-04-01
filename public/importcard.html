@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiPro | Import Entry</title>
+    <script src="security.js"></script> 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), 
+                        url('imgback/logo.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .software-card { 
+            background: rgba(255, 255, 255, 0.98); 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            
+        }
+
+        .input-field { 
+            width: 100%; padding: 10px 14px; 
+            border: 1px solid #d1d5db; 
+            border-radius: 8px; outline: none; transition: 0.2s; 
+            background: #fff; font-size: 14px; color: #1e293b;
+            border-left: 5px solid #ef4444; 
+        }
+        .input-field:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); }
+        .input-field-blue { border-left: 5px solid #3b82f6; }
+        
+        .input-fixed { background: #f8fafc; cursor: not-allowed; border-left-color: #64748b; color: #475569; }
+
+        .section-header { 
+            color: #ef4444; font-weight: 800; font-size: 13px; 
+            text-transform: uppercase; letter-spacing: 0.5px; 
+            display: flex; align-items: center; gap: 10px; 
+            margin-bottom: 20px; border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .save-btn { 
+            background: #ef4444; color: white; width: 100%; padding: 16px; 
+            border-radius: 10px; font-weight: 800; text-transform: uppercase; 
+            letter-spacing: 1.5px; transition: 0.3s; cursor: pointer;
+            border: none;
+        }
+        .save-btn:hover { background: #dc2626; letter-spacing: 3px; transform: translateY(-2px); }
+
+        /* Bank Suggestion Active Style */
+        .bank-option-active { background-color: #eff6ff !important; color: #3b82f6 !important; border-left: 4px solid #3b82f6 !important; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10">
+            <div class="text-center md:text-left">
+                <h1 id="displaySystemName" class="text-5xl font-black italic tracking-tighter text-white leading-none">LOGI<span class="text-red-500">PRO</span></h1>
+                <p class="text-[11px] font-bold text-slate-300 uppercase tracking-[4px] mt-2">Clearing & Forwarding _ Import _ Report</p>
+            </div>
+            <button onclick="goBackToLedger()" class="mt-4 md:mt-0 bg-white text-slate-900 text-[12px] font-black px-8 py-3 rounded-full flex items-center gap-3 uppercase shadow-xl hover:bg-red-500 hover:text-white transition-all duration-300">
+                <i class="fas fa-th-list text-red-500"></i> Open Ledger
+            </button>
+        </header>
+
+        <div class="software-card p-6 md:p-10 mb-10">
+            <form id="importForm" class="space-y-10" autocomplete="off">
+                <div>
+                    <h3 class="section-header"><i class="fas fa-id-card text-lg"></i> Consignee & GD Info</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-500 uppercase mb-2 block ml-1">Party Name (Locked) <span class="text-red-500">*</span></label>
+                            <input type="text" id="partyName" class="input-field font-bold uppercase input-fixed" readonly required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-500 uppercase mb-2 block ml-1">GD Number <span class="text-red-500">*</span></label>
+                            <input type="text" id="gdNum" class="input-field font-bold uppercase" placeholder="IM-KAPE-..." required>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="section-header"><i class="fas fa-shipping-fast text-lg"></i> Logistics & Shipment</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-500 uppercase mb-2 block ml-1">Container No.</label>
+                            <input type="text" id="contNum" class="input-field input-field-blue font-bold uppercase" placeholder="MSKU-...">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-500 uppercase mb-2 block ml-1">Shipping Line <span class="text-red-500">*</span></label>
+                            <input type="text" id="shipLine" class="input-field font-bold uppercase" placeholder="Line Name..." required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-500 uppercase mb-2 block ml-1">B/L or CRO No. <span class="text-red-500">*</span></label>
+                            <input type="text" id="blNum" class="input-field font-bold uppercase" placeholder="Enter B/L..." required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-200 shadow-inner relative">
+                    <h3 class="section-header !text-slate-700 !border-slate-300"><i class="fas fa-file-invoice-dollar text-lg"></i> Accounts & Billing</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-500 uppercase mb-2 block">Total Bill Amount</label>
+                            <input type="number" id="bill" class="input-field input-field-blue font-black text-lg" value="0">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-extrabold text-emerald-600 uppercase mb-2 block">Received Amount</label>
+                            <input type="number" id="paid" class="input-field input-field-blue font-black text-lg text-emerald-600" value="0">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-extrabold text-red-500 uppercase mb-2 block">Outstanding Balance</label>
+                            <div id="liveBalance" class="text-3xl font-black text-red-600 h-[45px] flex items-center">0</div>
+                        </div>
+                        <div class="relative">
+                            <label class="text-[11px] font-extrabold text-slate-500 uppercase mb-2 block">Bank / Payment Method</label>
+                            <input type="text" id="payMethod" autocomplete="off" class="input-field input-field-blue font-bold uppercase" placeholder="Type bank name...">
+                            <div id="customBankList" class="hidden absolute z-50 left-0 right-0 bg-white border border-slate-300 rounded-lg shadow-2xl max-h-56 overflow-y-auto mt-2">
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">CASH</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">HBL - HABIB BANK</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">UBL - UNITED BANK</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">MEEZAN BANK</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">BANK ALFALAH</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">MCB BANK</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">ALLIED BANK</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">FAYSAL BANK</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">ASKARI BANK</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">BANK AL HABIB</div>
+                                <div class="p-3 hover:bg-red-50 hover:text-red-600 cursor-pointer font-bold border-b border-slate-100">ONLINE TRANSFER</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="save-btn shadow-2xl">
+                    <i class="fas fa-check-circle mr-2"></i> Confirm & Save Import Record
+                </button>
+            </form>
+        </div>
+        <p class="text-center text-slate-400 text-xs font-bold uppercase tracking-widest">© 2026 LogiPro Systems - Secure Terminal</p>
+    </div>
+<script src="api.js"></script>
+<script>
+    // --- LOGIPRO DYNAMIC CONFIG ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentParty = urlParams.get('party') || "GENERAL";
+
+    // Header update
+    const topPartyName = document.getElementById('topPartyName');
+    if(topPartyName) {
+        topPartyName.innerText = currentParty.toUpperCase();
+    }
+    
+    // Window Load: Party name fill aur balance calculation
+    window.onload = function() {
+        const partyInput = document.getElementById('partyName');
+        if(partyInput) {
+            partyInput.value = currentParty.toUpperCase();
+        }
+        calculateBalance();
+    };
+
+    // --- BUTTON FUNCTIONS ---
+    function openLedger() {
+        window.location.href = `importdataentry.html?party=${encodeURIComponent(currentParty)}`;
+    }
+
+    function goBackToLedger() {
+        openLedger();
+    }
+
+    // --- SAVE ENTRY (URL UPDATED FOR MODULAR BACKEND) ---
+    async function saveEntry(event) {
+        if(event) event.preventDefault();
+
+        try {
+            const pName = document.getElementById('partyName')?.value || "";
+            const gdNum = document.getElementById('gdNum')?.value || "";
+            const billAmt = document.getElementById('bill')?.value || "0";
+            const outBal = document.getElementById('liveBalance')?.innerText.replace(/,/g, '') || "0";
+
+            // Validation check
+            if (!gdNum || billAmt === "0" || billAmt === "") {
+                alert("GD Number aur Bill lazmi bharen!");
+                return;
+            }
+
+            const data = {
+                date: new Date().toISOString().split('T')[0], 
+                party: pName,
+                gd: gdNum,
+                container: document.getElementById('contNum')?.value || "",
+                line: document.getElementById('shipLine')?.value || "",
+                bl: document.getElementById('blNum')?.value || "",
+                bill: billAmt,
+                paid: document.getElementById('paid')?.value || "0",
+                method: document.getElementById('payMethod')?.value || "CASH",
+                payable: outBal
+            };
+
+            // NAYA URL: api/import/add (Aapke naye routes ke mutabiq)
+            const response = await fetch('http://localhost:3000/api/import/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("LogiPro: Data Cloud par save ho gaya!");
+                openLedger(); 
+            } else {
+                alert("Server Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Cloud Error:", error);
+            alert("Database connect nahi ho raha. CMD check karein ke server chal raha hai.");
+        }
+    }
+
+    // --- CALCULATION LOGIC ---
+    function calculateBalance() {
+        const billVal = document.getElementById('bill')?.value || 0;
+        const paidVal = document.getElementById('paid')?.value || 0;
+        
+        const bill = parseFloat(billVal) || 0;
+        const paid = parseFloat(paidVal) || 0;
+        const balance = bill - paid;
+        
+        const balanceElement = document.getElementById('liveBalance');
+        if(balanceElement) {
+            balanceElement.innerText = balance.toLocaleString();
+            balanceElement.style.color = balance > 0 ? "#ef4444" : "#10b981";
+        }
+    }
+
+    // Event Listeners for real-time update
+    document.getElementById('bill')?.addEventListener('input', calculateBalance);
+    document.getElementById('paid')?.addEventListener('input', calculateBalance);
+
+    // Form submission listener
+    const importForm = document.getElementById('importForm');
+    if(importForm) {
+        importForm.onsubmit = saveEntry;
+    }
+
+    // --- BANK SUGGESTION LOGIC ---
+    const payInput = document.getElementById('payMethod');
+    const bankList = document.getElementById('customBankList');
+
+    if(payInput && bankList) {
+        payInput.addEventListener('focus', () => bankList.classList.remove('hidden'));
+        payInput.addEventListener('blur', () => setTimeout(() => bankList.classList.add('hidden'), 200));
+
+        bankList.querySelectorAll('div').forEach(item => {
+            item.addEventListener('click', () => {
+                payInput.value = item.innerText;
+                bankList.classList.add('hidden');
+            });
+        });
+    }
+
+    function goToEntry() {
+        window.location.href = `importdataentry.html?party=${encodeURIComponent(currentParty)}`;
+    }
+</script>
+</body>
+</html>

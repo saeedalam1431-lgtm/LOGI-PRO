@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiPro | GD Archive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            background-color: #050a18; 
+            /* Gradient ko 0.5 rakha hai taake image aur text dono balance rahein */
+            background-image: linear-gradient(rgba(5, 10, 24, 0.5), rgba(5, 10, 24, 0.5)), url('imgback/logo.png');
+            
+            /* YE HAI MAIN SETTING: cover se image poori screen stretch ho kar fill karegi */
+            background-size: cover; 
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            
+            font-family: 'Inter', sans-serif; 
+            color: white; 
+            min-height: 100vh; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .party-card { 
+            /* Cards ke peeche blur thoda kam kiya hai taake background image saaf dikhe */
+            background: rgba(22, 31, 50, 0.55); 
+            backdrop-filter: blur(4px);
+            border-radius: 15px; 
+            transition: all 0.3s ease; 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .party-card:hover { 
+            transform: translateY(-5px); 
+            border-color: #ef4444; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #475569;
+            transition: color 0.2s;
+            z-index: 20;
+        }
+        .delete-btn:hover { color: #ef4444; }
+        
+        .badge-export { background: #ef4444 !important; color: white !important; }
+        .badge-import { background: #facc15 !important; color: black !important; }
+        
+        .folder-bg { 
+            position: absolute; 
+            right: -10px; 
+            bottom: -10px; 
+            font-size: 60px; 
+            color: rgba(255,255,255,0.03); 
+            transform: rotate(-15deg); 
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <script src="security.js"></script>
+
+    <div class="max-w-7xl mx-auto w-full">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <button onclick="window.location.href='index.html'" class="text-slate-500 hover:text-white mb-2 text-[10px] font-bold uppercase tracking-widest transition-all">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+                </button>
+                <h1 class="text-2xl font-black tracking-tighter italic text-white">
+                    <i class="fas fa-box-archive mr-2 text-red-600"></i> GD PARTY <span class="text-red-600">ARCHIVE</span>
+                </h1>
+                <p class="text-slate-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Digital Customs Records Portal</p>
+            </div>
+            <div class="relative w-full md:w-80">
+                <i class="fas fa-search absolute left-4 top-3 text-slate-500 text-xs"></i>
+                <input type="text" id="archiveSearch" onkeyup="filterArchive()" placeholder="Quick Search Party..." 
+                       class="w-full bg-[#161f32] border border-slate-700 rounded-xl px-10 py-2.5 text-xs outline-none focus:border-red-600 transition-all text-white">
+            </div>
+        </header>
+
+        <div id="archiveGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            </div>
+    </div>
+
+    <script>
+        const storageKey = 'my_local_ledgers';
+
+        function loadArchive() {
+            const grid = document.getElementById('archiveGrid');
+            let allSystems = JSON.parse(localStorage.getItem(storageKey)) || [];
+            let gdFiles = allSystems.filter(s => s.isGD === true || (s.category && s.category.toUpperCase().includes('GD')));
+
+            if(gdFiles.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center p-20 bg-[#161f32]/50 rounded-3xl border-2 border-dashed border-slate-800"><p class="text-slate-500">No GD Files Found</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = gdFiles.map((s, index) => {
+                const actualIndex = allSystems.findIndex(item => item.name === s.name);
+                const isImport = (s.category && s.category.toUpperCase().includes('IMPORT'));
+                const badgeClass = isImport ? 'badge-import' : 'badge-export';
+                const targetPage = isImport ? 'importdataentry.html' : 'huk.html';
+                
+                return `
+<div class="party-card p-4 group cursor-pointer" onclick="openParty('${targetPage}', '${s.name}')">
+    <button onclick="deleteParty(event, '${s.id}')" class="delete-btn">
+        <i class="fas fa-trash-alt text-xs"></i>
+    </button>
+    <div class="folder-bg"><i class="fas fa-folder"></i></div>
+    <span class="${badgeClass} text-[9px] font-black px-2 py-0.5 rounded mb-3 inline-block uppercase">
+        ${s.category || 'GD FILE'}
+    </span>
+    <h2 class="text-sm font-black text-white uppercase mb-1 truncate">${s.name}</h2>
+    <div class="flex items-center text-slate-500 text-[9px] mb-4 font-bold uppercase truncate">
+        <i class="fas fa-user-tie mr-1.5"></i> ${s.company || 'NO DETAILS'}
+    </div>
+    <div class="text-white/50 group-hover:text-white font-black text-[9px]">
+        OPEN RECORDS <i class="fas fa-chevron-right ml-2 text-[8px]"></i>
+    </div>
+</div>`;
+            }).reverse().join('');
+        }
+
+        function openParty(page, name) { window.location.href = `${page}?party=${encodeURIComponent(name)}`; }
+        
+       function deleteParty(event, id) {
+    event.stopPropagation(); // Card open hone se rokne ke liye
+    if(confirm('Are you sure you want to delete this party?')) {
+        let data = JSON.parse(localStorage.getItem(storageKey)) || [];
+        
+        // SECURITY logic: ID ke zariye check karega ke sahi file delete ho rahi hai
+        let updatedData = data.filter(item => item.id !== id); 
+        
+        localStorage.setItem(storageKey, JSON.stringify(updatedData));
+        loadArchive(); // Screen refresh karne ke liye
+    }
+}
+
+        function filterArchive() {
+    // 1. Pehle raw input uthaya
+    let rawInput = document.getElementById('archiveSearch').value;
+    
+    // 2. SECURITY LAYER: Symbols aur tags ko saaf kiya taake system crash na ho
+    // Phir usay UpperCase kiya (Aapka original logic)
+    let val = Security.sanitize(rawInput).toUpperCase(); 
+    
+    let cards = document.getElementsByClassName('party-card');
+    
+    // 3. Loop chala kar check kiya (Aapka original logic intact hai)
+    for (let c of cards) { 
+        c.style.display = c.innerText.toUpperCase().includes(val) ? "" : "none"; 
+    }
+}
+        window.onload = loadArchive;
+    </script>
+</body>
+</html>
