@@ -4,7 +4,7 @@ const pool = mysql.createPool({
     host: 'logipro-database-do-user-35149116-0.e.db.ondigitalocean.com',
     port: 25060,
     user: 'doadmin',
-    password: 'AVNS_aTEvKz0URVZjsLvCQ7o', 
+password: process.env.DB_PASSWORD,
     database: 'defaultdb',
     ssl: { rejectUnauthorized: false },
     waitForConnections: true,
